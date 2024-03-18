@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Sequence Space Synesthesia</title>
+        <link rel="stylesheet" href="./sequence-space-synesthesia.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+    </head>
+    <body>
+        <div class="content">
+            <section id="instructions-page" class="centre-wrapper hidden instructions">
+                <div class="instructions-text">
+                    <div style="text-align: left;">
+                        <p>
+                            In this test you'll see numbers (0-9), days of the week (e.g., Tuesday), and months of the year (e.g., July) displayed in the centre of the screen.
+                        <br><br>
+                            Your task is to think about how these concepts might be arranged spatially on a two-dimensional (ie., flat) screen. Some people may automatically think about these concepts spatially in their everyday life, and if this is something you do, then you should use this.
+                            <br><br>
+                            For other people this may seem like a strange task, but just go with your intuitions. There aren’t any right or wrong answers.
+                            <br><br>
+                            <strong>When you see each item on the computer screen, visualise where it fits spatially and click the mouse in the corresponding location on the screen.</strong>
+                            <br><br>
+                            Each item (number or day or month) is repeated three times.
+                            <br><br>
+                            In order to accurately measure this type of synaesthesia this task will be longer than others in The Perception Census. We appreciate you sticking with it! You will be able to see your progress as you go through the test.
+                        </p>
+                    </div>
+                <div class="centre-wrapper">
+                    <div id="instructions-button" class="psButton">Next</div>
+                </div>
+            </section>
+            <section id="main-experiment-page">
+                <div id="main-experiment">
+                    <div id="trial-counter"></div>
+                    <div id="main-panels">
+                        <div id="left-panel">
+                            <div id="middle">
+                                <div id="string-inducer" style="text-align: center">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="right-panel">
+                        </div>
+                    </div>
+                    <div id="response-buttons">
+                        <div id="no-concurrent-button" class="btn canvas-btn"></div>
+                        <div id="select-button" class="btn canvas-btn">Select</div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="please-wait-page" class="instructions hidden" style="text-align: center; display: none;">
+                Please wait loading...<br>
+                <div class="loader"></div>
+            </section>
+            <div id="viewport-warning" style="width: 100%; display: none;">
+                <h1>Please resize your browser!</h1>
+                <div id="viewport-warning-content">
+                    <p>We have detected that your browser viewing area is currently too small.  Our experiments are designed to work on a viewport size of at least 980 x 660 pixels.</p>
+                    <p>Your current viewport width is: <span id="vp-width">878</span> and height: <span id="vp-height">870</span></p>
+                    <p>Please increase your viewport with one or more of the following methods:
+                    </p>
+                    <ul>
+                        <li>
+                            Maximise your browser window.
+                        </li>
+                        <li>
+                            If you are on a tablet, try rotating the screen to another orientation.
+                        </li>
+                        <li>
+                            Zoom out.  The keyboard short-cut for this is Ctrl and - (Windows, Linux, and Chrome OS) and ⌘ and - (Mac).  If you are on a tablet, you might need do a google search for the way to be able to zoom out.
+                        </li>
+                        <li>
+                            Change your screen resolution or skip to a device with a larger monitor or resolution.
+                        </li>
+                    </ul>
+                    <br>
+                    This message will dissapear once your window is large enough.<br>
+                    <br>
+                </div><br>
+                <button id="viewport-continue">Continue Anyway</button>
+            </div>
+        </div>
+    </body>
+    <script src="./sequence-space-synesthesia.js"></script>
+</html>

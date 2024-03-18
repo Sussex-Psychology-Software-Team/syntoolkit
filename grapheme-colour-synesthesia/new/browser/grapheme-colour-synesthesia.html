@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Grapheme Colour Synesthesia Test</title>
+        <link rel="stylesheet" href="./grapheme-colour-synesthesia.css">
+    </head>
+    <body>
+        <div id="container"> <!-- 770 = (360*2) + 30 + 10px gaps-->
+            <div id="top-text">
+                <span>Choose the best colour by clicking on the colour-bar and shade box.</span>
+                <span><span id="remaining"></span> left to do.</span>
+            </div>
+            <div id="picker">
+                <canvas id="shade" height="180" width="180"></canvas>
+                <canvas id="hue" height="180" width="30"></canvas>
+                <span id="grapheme" height="180" width="180">A</span>
+            </div>
+            <canvas id="display" height="180" width="410"></canvas>
+            <div id="buttons">
+                <input type="button" id="no_colour" class="button" value="'No Colour">
+                <input type="button" id="select" class="button"value='Select'>
+            </div>
+        </div>
+    </body>
+    <script src="./grapheme-colour-synesthesia.js"></script>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Grapheme Colour Synesthesia Test</title>
+    <link rel="stylesheet" href="./grapheme-colour-synesthesia.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+  </head>
+  <body>
+    <div id="adult-gc-wrapper">
+        <section id="youhavesynaesthesia" class="instructions hidden">
+            Some people with grapheme-colour synaesthesia experience colour associations for just numbers, or just letters,
+            and some for both. Please select which of the following applies to you:
+            <br>
+            I have involuntary, automatic colour associations when I see, hear or think about NUMBERS.<br>
+
+            <div id="has_number_radios" class="intro-radios">
+                <input type="radio" name="has_number" value="yes"> Yes<br>
+                <input type="radio" name="has_number" value="no"> No<br>
+            </div>
+
+            <br>
+            I have involuntary, automatic colour associations when I see, hear or think about LETTERS.<br>
+
+            <div id="has_letter_radios" class="intro-radios">
+                <input type="radio" name="has_letter" value="yes"> Yes<br>
+                <input type="radio" name="has_letter" value="no"> No<br>
+            </div>
+            <div class="centre-wrapper">
+                <div id='intro-button-2' class="psButton noselect">Continue</div>
+            </div>
+        </section>
+
+        <section id="exitpage" class="instructions hidden centre-wrapper">
+        </section>
+
+        <section id='instructions' class="instructions hidden">
+            <div class="main-instructions-text">
+                The synaesthesia test will start on the next page. You will see <var class="type-of-grapheme-plural"></var> on the screen next to a
+                colour palette. For each <var class="type-of-grapheme"></var>, choose the colour you think it best goes with. You can
+                choose any colour you like, but please don't pick the same colour for everything. Be as fast as you can.<br>
+                <br>
+                Here’s how to choose a colour. First click the vertical colour bar to pick the kind of colour you want. Then pick the shade by clicking on the shade box. Black, white and grey are at the edges of the shade box. Your chosen colour is shown in the large rectangle.<br>
+                <br>
+                In order to properly measure this type of synaesthesia, this task will take longer than others in The Perception Census. We appreciate you sticking with it! You will be able to see your progress as you go through the test.<br>
+                <br>
+            </div>
+            <br>
+            <div class="main-instructions-text">
+                <br>
+                <div class="centre-wrapper">
+                    <div id='start-button' class="psButton noselect">Start</div>
+                </div>
+            </div>
+        </section>
+
+        <section id='mainExperiment' style="position: absolute; left: 0; top: 0; display: none">
+            <canvas id="layer1" style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+            <canvas id="layer2" style="position: relative; left: 0; top: 0; z-index: 1; pointer-events:none;"></canvas>
+            <div id='select-button' class="psButton adult-gc-canvas-btn noselect">Select</div>
+            <div id='no-colour-button' class="psButton adult-gc-canvas-btn noselect">No Colour</div>
+        </section>
+
+        <section id='pauseDiv' class="instructions hidden">
+            <div class="instructionsemphasis centre-wrapper">Paused</div><br>
+            <br>
+
+            You have paused the experiment. Please don’t close this window or your experiment will be lost.<br>
+            <br>
+            The experiment needs to run in full screen, but if you need to exit for any reason just press Escape<br>
+            <br>
+            Press 'Continue' to carry on with the experiment.<br>
+            <br>
+            <div class="centre-wrapper">
+                <div id='continue-button' class="psButton noselect">Continue</div>
+            </div>
+        </section>
+
+
+    </div>
+    <div id="adult-gc-warning-message">
+        This website is only viewable on larger windows than this - to fix this:<br>
+        a) If you can, drag the window so it is wider <br>
+        b) If you are on an iPad, try viewing in landscape. <br>
+        c) Try viewing on your laptop <br>
+    </div>
+  </body>
+  <script src="./grapheme-colour-synesthesia.js"></script>
+  <script src="./results-manager.js"></script>
+</html>
