@@ -12,7 +12,7 @@ let grapheme_set = ''
 //note: if using single option (e.g. 1 radio-buttons each for 'letters' and 'numbers) check if selected with e.g.letter_syn[0] !== undefined
 if(letter_syn=='no' && number_syn=='no'){
     // move foward
-    endTest()
+    endTest('You have indicated that you do not have Grapheme-colour synaesthesia.')
 }
 if(letter_syn=='yes'){ 
     grapheme_set += letters
