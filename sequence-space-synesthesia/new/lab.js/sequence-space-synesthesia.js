@@ -12,14 +12,6 @@ function endTest(end_text=JSON.stringify(data)){
     document.getElementById("main").className = "unhook"; //stops our main div taking up the whole screen
     text.innerHTML = end_text+'<br>Please press the continue button below.'//JSON.stringify(data)
 }
-// Browser specific ----------------
-function endTest(end_text=JSON.stringify(data)){
-    document.removeEventListener('click',changeText)
-    document.removeEventListener('keydown',changeText)
-    document.getElementById('counter').hidden = true
-
-    text.innerHTML = end_text
-}
 
 
 
