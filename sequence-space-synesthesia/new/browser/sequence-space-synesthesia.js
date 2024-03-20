@@ -1,9 +1,10 @@
-function endTest(){
+// Browser specific ----------------
+function endTest(end_text=JSON.stringify(data)){
     document.removeEventListener('click',changeText)
     document.removeEventListener('keydown',changeText)
     document.getElementById('counter').hidden = true
 
-    text.innerHTML = JSON.stringify(data)
+    text.innerHTML = end_text
 }
 
 // Stimuli ----------------
@@ -37,8 +38,8 @@ const seqs = duplicateArray(sequences_set,3) //e.g. dups=2 doubles array
 
 
 // Run ----------------
-let trial_number = -1 //trial -1 is the instruction screen
-const data = []
+let trial_number = -1, start_time //trial -1 is the instruction screen
+const data = [];
 const text = document.getElementById('sequence')
 const count = document.getElementById('count')
 
@@ -57,6 +58,7 @@ function changeText(e){
             'window_width': window.innerWidth,
             'window_height': window.innerHeight,
             'no_association': keydown,
+            'reaction_time': e.timeStamp-start_time
         })
         console.log(data)
     } else { //on first click
@@ -71,8 +73,7 @@ function changeText(e){
     } else if(trial_number === sequences_set.length){ //STOPPING RULE
         const no_association_count = data.filter(function(e){return e.no_association === true})
         if(no_association_count.length/sequences_set.length > .9){
-            endTest()
-            text.innerHTML = "Sorry, you pressed the 'No Association' key too many times to continue this test"
+            endTest("Sorry, you pressed the 'No Association' key too many times to continue this test")
             return
         }
     }
@@ -80,6 +81,7 @@ function changeText(e){
     trial_number++ //increase trial number
     text.innerHTML = seqs[trial_number]
     count.innerHTML = seqs.length-trial_number
+    start_time = performance.now()
 }
 
 

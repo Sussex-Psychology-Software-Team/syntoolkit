@@ -1,23 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Sequence Space Synesthesia</title>
-        <link rel="stylesheet" href="./sequence-space-synesthesia.css">
-    </head>
-    <body>
-        <p id="counter" hidden><span id="count"></span> trials remaining</p>
-        <p id="sequence">
-            In this test you'll see numbers (0-9), days of the week (e.g., Tuesday), and months of the year (e.g., July) displayed in the centre of the screen.<br><br>
-            Your task is to think about how these concepts might be arranged spatially on a two-dimensional (ie., flat) screen. Some people may automatically think about these concepts spatially in their everyday life, and if this is something you do, then you should use this.<br><br>
-            For other people this may seem like a strange task, but just go with your intuitions. There aren’t any right or wrong answers.<br><br>
-            <strong>When you see each item on the computer screen, visualise where it fits spatially and click the mouse in the corresponding location on the screen.</strong><br><br>
-            Each item (number or day or month) is repeated three times.<br><br>
-            In order to accurately measure this type of synaesthesia this task will be longer than others in The Perception Census. We appreciate you sticking with it! You will be able to see your progress as you go through the test.<br><br>
-            <i>Please click anywhere to continue.</i>
-        </p>
-    </body>
-    <script src="./sequence-space-synesthesia.js"></script>
-</html>
+<style>
+    /* LAB.JS */
+    :root{
+        --line-height: 1 !important;
+    }
+
+    #main{
+        position: absolute;
+        background-color: white;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .unhook{
+        height: auto !important;
+    }
+    
+    /* -------------------- */
+    p {
+    /* Stop text highlighting */
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Old versions of Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+    }
+
+    #counter{
+        float: right;
+    }
+
+    #sequence{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 20px;
+    }
+
+</style>
+<main id="main">
+    <p id="counter" hidden><span id="count"></span> trials remaining<br>Press Spacebar or 'n' if no association.</p>
+    <p id="sequence">
+        In this test you'll see numbers (0-9), days of the week (e.g., Tuesday), and months of the year (e.g., July) displayed in the centre of the screen.<br><br>
+        Your task is to think about how these concepts might be arranged spatially on a two-dimensional (ie., flat) screen. Some people may automatically think about these concepts spatially in their everyday life, and if this is something you do, then you should use this.<br><br>
+        For other people this may seem like a strange task, but just go with your intuitions. There aren’t any right or wrong answers.<br><br>
+        <strong>When you see each item on the computer screen, visualise where it fits spatially and click the mouse in the corresponding location on the screen.</strong><br><br>
+        Each item (number or day or month) is repeated three times.<br><br>
+        In order to accurately measure this type of synaesthesia this task will be longer than others in The Perception Census. We appreciate you sticking with it! You will be able to see your progress as you go through the test.<br><br>
+        If you do not have any spatial association with the sequence displayed press the 'Spacebar' or 'n' key to skip.<br><br>
+        <i>Please press Spacebar to continue.</i>
+    </p>
+</main>

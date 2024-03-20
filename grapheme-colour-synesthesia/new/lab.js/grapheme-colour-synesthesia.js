@@ -1,12 +1,12 @@
-
 // Lab.js ---------------- NOTE: run this whole script on 'run' event
 // create graphemes list based on answers to previous synaesthesia questions
 const ds = this.options.datastore
-const letter_syn = ds.extract('letters') //name of HTML input element, returns selected value
-const number_syn = ds.extract('numbers')
+//WAYS TO ACCESS THE FORM RESPONSES: ds.data[ds.data.length-1].letters; ds.get('letters'); ds.extract('letters','grapheme-questionnaire') where 'grapheme-questionnaire' is the name of the lab.js element
+const letter_syn = ds.get('letters') //name of HTML input element, returns selected value
+const number_syn = ds.get('numbers')
 
-const letters = 'A'//'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-const numbers = '0'//'0123456789'
+const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+const numbers = '0123456789'
 let grapheme_set = ''
 
 //note: if using single option (e.g. 1 radio-buttons each for 'letters' and 'numbers) check if selected with e.g.letter_syn[0] !== undefined
@@ -21,21 +21,19 @@ if(number_syn=='yes'){
     grapheme_set += numbers
 }
 
-console.log(this.options.screen)
-
 //store data at end of test
-function endTest(){
+function endTest(end_text){
     //stuff to do when the exp is ended
-    document.getElementById('container').innerHTML = JSON.stringify(data)
     for(let i=0;i<data.length;i++){
         ds.commit(data[i])
     }
+    document.getElementById('container').innerHTML = end_text+'<br>Please press the Continue button below'//JSON.stringify(data)
+    document.querySelector('button[type="submit"][form="page-form"]').style.display = 'block';
     return
 }
 
 
-
-// CAVAS ------------------
+// CANVAS ------------------
 const hue_canvas = document.getElementById("hue");
 const hue_ctx = hue_canvas.getContext('2d');
 const shade_canvas = document.getElementById("shade",{ willReadFrequently: true });
@@ -43,86 +41,6 @@ const shade_ctx = shade_canvas.getContext('2d');
 const display_canvas = document.getElementById("display");
 const display_ctx = display_canvas.getContext('2d');
 
-
-// HUE -----------------
-function drawHues(){
-    hue_ctx.clearRect(0, 0, hue_canvas.width, hue_canvas.height)
-    for(let h=0; h<361; h++){
-        hue_ctx.strokeStyle = `hsl(${h+offset}, 100%, 50%)`;
-        hue_ctx.beginPath();
-        hue_ctx.moveTo(0, h*(hue_canvas.height/360));
-        hue_ctx.lineTo(hue_canvas.width, h*(hue_canvas.height/360));
-        hue_ctx.stroke();
-    }
-}
-
-hue_canvas.addEventListener('mousedown',hueSelect);
-hue_canvas.addEventListener('mouseup', ()=>{ hue_canvas.onmousemove = null });
-hue_canvas.addEventListener('mouseout', ()=>{ hue_canvas.onmousemove = null });
-
-function hueSelect(e){
-    drawHues() //clear canvas
-    //draw black line at location
-    hue_ctx.strokeStyle = 'black';
-    hue_ctx.beginPath();
-    hue_ctx.moveTo(0, e.offsetY);
-    hue_ctx.lineTo(hue_canvas.width, e.offsetY);
-    hue_ctx.stroke();
-    // replace canvas colour
-    //hue_canvas.addEventListener('mousemove',hueSelect);
-    h = (e.offsetY*(360/hue_canvas.height))+offset
-    shadeSelect(shade_loc) // keep selected shade consistent
-    shade_canvas.onmousemove = null //remove mousemove event added in shadeSelect()
-    hue_canvas.onmousemove = hueSelect //add handler on click to move as well
-}
-
-
-// SHADE -----------------
-function drawShades(h){
-    shade_ctx.clearRect(0,0,shade_canvas.width,shade_canvas.height);
-    const w = shade_canvas.width/100 //canvas width is 360, with 100 s and l values
-    for(let s=0;s<101;s++){
-        for(let l=0;l<101;l++){
-            shade_ctx.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;
-            shade_ctx.fillRect(Math.ceil(s*w),Math.ceil(l*w),Math.ceil(w),Math.ceil(w)); //w+1 on last two also deals with aliasing well enough?
-        }
-    }
-}
-
-//selection on shade canvas
-shade_canvas.addEventListener('mousedown',shadeSelect);
-shade_canvas.addEventListener('mouseup', ()=>{ shade_canvas.onmousemove = null });
-shade_canvas.addEventListener('mouseout', ()=>{ shade_canvas.onmousemove = null });
-
-function shadeSelect(e){
-    //hue must be selected first, and stop mousemove out of bounds
-    if(h===undefined || e.offsetX>=shade_canvas.width || e.offsetX<0 || e.offsetY>shade_canvas.height || e.offsetY<0){ return }
-    //store data
-    const w = shade_canvas.width/100
-    data[trial_num].hsl = [h, Math.ceil(e.offsetX/w), Math.ceil(e.offsetY/w)] //store current hsl
-    shade_loc = {'offsetX':e.offsetX, 'offsetY':e.offsetY} //store selected shade. stays the same on event of hue change.
-    //draw on canvases
-    drawShades(h) //redraw
-    selectedColour(shade_loc)  //get colour on fresh draw
-    //draw select circle
-    shade_ctx.strokeStyle = 'black'
-    shade_ctx.beginPath();
-    shade_ctx.arc(e.offsetX, e.offsetY, 5, 0, 2 * Math.PI);
-    shade_ctx.stroke();
-    shade_canvas.onmousemove = shadeSelect
-}
-
-
-// DSIPLAY -------------------
-function selectedColour(e){
-    select.disabled = false
-    //get colour and put on other canvas, e.target.getContext('2d').getImageData()
-    const p = shade_ctx.getImageData(e.offsetX, e.offsetY, 1, 1).data; //rgb - can optionally use a input event?
-    display_ctx.fillStyle = `rgb(${p})`;
-    display_ctx.fillRect(0, 0, display_canvas.width, display_canvas.height)
-    grapheme.style.color = `rgb(${p})`; //comment this out to remove chaning the font colour
-    data[trial_num].rgb = Object.values(p).slice(0,-1) //store data
-}
 
 
 // GRAPHEMES ------------------
@@ -150,7 +68,90 @@ function getGraphemes(raw_graphemes, repeats){
     return graphemes
 }
 
-const graphemes = getGraphemes(grapheme_set,3) //repeats=2 returns 2 copies of array
+
+// HUE -----------------
+function drawHues(){
+    const width = hue_canvas.width
+    const height = hue_canvas.height
+    hue_ctx.clearRect(0, 0, width, height)
+    for(let h=0; h<361; h++){
+        hue_ctx.fillStyle = `hsl(${h+offset}, 100%, 50%)`;
+        hue_ctx.fillRect(0, h*(height/360), width, 2)
+        //hue_ctx.strokeStyle = `hsl(${h+offset}, 100%, 50%)`
+        //hue_ctx.beginPath()
+        //hue_ctx.moveTo(0, h*(height/360))
+        //hue_ctx.lineTo(width, h*(height/360))
+        //hue_ctx.stroke()
+    }
+}
+
+hue_canvas.addEventListener('mousedown',hueSelect);
+hue_canvas.addEventListener('mouseup', ()=>{ hue_canvas.onmousemove = null });
+hue_canvas.addEventListener('mouseout', ()=>{ hue_canvas.onmousemove = null });
+
+function hueSelect(e){
+    drawHues() //clear canvas
+    //draw black line at location
+    hue_ctx.strokeStyle = 'black';
+    hue_ctx.beginPath();
+    hue_ctx.moveTo(0, e.offsetY);
+    hue_ctx.lineTo(hue_canvas.width, e.offsetY);
+    hue_ctx.stroke();
+    // replace canvas colour
+    hue_loc = e.offsetY //laziness for handling resize events
+    h = ((e.offsetY*(360/hue_canvas.height))+offset) % 360
+    shadeSelect(shade_loc) // keep selected shade consistent
+    shade_canvas.onmousemove = null //remove mousemove event added in shadeSelect()
+    hue_canvas.onmousemove = hueSelect //add handler on click to move as well
+}
+
+
+// SHADE -----------------
+function drawShades(h){
+    shade_ctx.clearRect(0,0,shade_canvas.width,shade_canvas.height);
+    const w = shade_canvas.width/100 //canvas width is 360, with 100 s and l values
+    for(let s=0;s<101;s++){
+        for(let l=0;l<101;l++){
+            shade_ctx.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;
+            shade_ctx.fillRect(Math.ceil(s*w),Math.ceil(l*w),Math.ceil(w),Math.ceil(w)); //w+1 on last two also deals with aliasing well enough?
+        }
+    }
+}
+
+//selection on shade canvas
+shade_canvas.addEventListener('mousedown',shadeSelect);
+shade_canvas.addEventListener('mouseup', ()=>{ shade_canvas.onmousemove = null });
+shade_canvas.addEventListener('mouseout', ()=>{ shade_canvas.onmousemove = null });
+
+function shadeSelect(e){
+    //hue must be selected first, and stop mousemove out of bounds
+    if(h===undefined || e.offsetX>shade_canvas.width || e.offsetX<0 || e.offsetY>shade_canvas.height || e.offsetY<0){ return }
+    //store data
+    const w = shade_canvas.width/100
+    data[trial_num].hsl = [h, Math.round(e.offsetX/w), Math.round(e.offsetY/w)] //store current hsl
+    shade_loc = {'offsetX':e.offsetX, 'offsetY':e.offsetY} //store selected shade. stays the same on event of hue change.
+    //draw on canvases
+    drawShades(h) //redraw
+    selectedColour(shade_loc)  //get colour on fresh draw
+    //draw select circle
+    shade_ctx.strokeStyle = 'black'
+    shade_ctx.beginPath();
+    shade_ctx.arc(e.offsetX, e.offsetY, w*1, 0, 2 * Math.PI);
+    shade_ctx.stroke();
+    shade_canvas.onmousemove = shadeSelect
+}
+
+
+// DSIPLAY -------------------
+function selectedColour(e){
+    select.disabled = false
+    //get colour and put on other canvas, e.target.getContext('2d').getImageData()
+    const p = shade_ctx.getImageData(e.offsetX, e.offsetY, 1, 1).data; //rgb - can optionally use a input event?
+    display_ctx.fillStyle = `rgb(${p})`;
+    display_ctx.fillRect(0, 0, display_canvas.width, display_canvas.height)
+    grapheme.style.color = `rgb(${p})`; //comment this out to remove chaning the font colour
+    data[trial_num].rgb = Object.values(p).slice(0,-1) //store data
+}
 
 
 // BUTTONS ---------------------
@@ -166,26 +167,31 @@ function buttonClick(e){
         data[trial_num].hsl = []
     }
     data[trial_num].no_colour = e.target.id==='no_colour'
+    data[trial_num].reaction_time = e.timeStamp-start_time
+    console.log(data)
     newTrial()
 }
 
 
 // RUN ----------------
-//init globals
+//text displays
 const grapheme = document.getElementById("grapheme")
 const remaining = document.getElementById("remaining")
-let h, offset, shade_loc, data=[], trial_num = -1;
+
+//globals
+const graphemes = getGraphemes(grapheme_set,3) //repeats=2 returns 2 copies of array
+let h, offset, shade_loc, data=[], trial_num = -1, hue_loc, start_time  //being lazy with the y
 
 function newTrial(){
     trial_num++
     if(trial_num === grapheme_set.length){ //STOPPING RULE
         const no_colour_count = data.filter(function (e) { return e.no_colour === true; });
         if(no_colour_count.length/grapheme_set.length > .9){ //end if >90% of trials were 'no colour'
-            document.getElementById('container').innerHTML = "Sorry, you pressed the 'No Colour' button too many times to continue this test."
+            endTest("Sorry, you pressed the 'No Colour' button too many times to continue this test.")
             return
         }
     } else if(trial_num==graphemes.length){ //END OF EXP
-        endTest()
+        endTest('')
         return
     }
 
@@ -194,7 +200,7 @@ function newTrial(){
     drawHues()
 
     //clear display
-    shade_ctx.clearRect(0,0,shade_canvas.width,shade_canvas.height);
+    shade_ctx.clearRect(0, 0, shade_canvas.width, shade_canvas.height)
     display_ctx.clearRect(0, 0, display_canvas.width, display_canvas.height)
     select.disabled = true
 
@@ -205,17 +211,54 @@ function newTrial(){
     //setup data
     const g = graphemes[trial_num]
     data.push({
-        'trial_number': trial_num+1,
+        'trial_number': trial_num,
         'grapheme':g,
         'rgb':[],
         'hsl':[],
-        'no_colour': false
+        'no_colour': false,
+        'reaction_time':0,
     })
     
     //update html
     grapheme.style.color = 'black';
     grapheme.innerHTML = g;
     remaining.innerHTML = graphemes.length-trial_num
+    start_time = performance.now()
 }
 
 newTrial()
+
+
+// WINDOW RESIZE ------------
+window.onresize = windowResize
+let min = Math.min(window.innerWidth, window.innerHeight)
+
+function windowResize(){ // set canvas size in HTML
+    const change = min/Math.min(window.innerWidth, window.innerHeight)
+    min = Math.min(window.innerWidth, window.innerHeight)
+    const thirty = Math.round(.3*min)
+    //document.getElementById("container").style.width = .7*min+'px'
+    //document.getElementById("picker").style.width = .7*min+'px'
+    //document.getElementById("picker").style.height = .3*min+'px'
+    hue_canvas.height = thirty
+    hue_canvas.width = thirty/10
+    shade_canvas.width = thirty
+    shade_canvas.height = thirty
+    display_canvas.height = thirty
+    display_canvas.width = .7*min
+    drawHues() //redraw
+    if(h!==undefined){ // redraw selected values
+        let e = {'offsetY': hue_loc /= change } // too difficult to extract hue_loc from h otherwise..
+        hueSelect(e)
+        drawShades(h)
+        if(change!=1){
+            shade_loc.offsetX /= change
+            shade_loc.offsetY /= change
+        }
+        shadeSelect(shade_loc)
+        hue_canvas.onmousemove = null
+        shade_canvas.onmousemove = null
+    }
+}
+
+windowResize()

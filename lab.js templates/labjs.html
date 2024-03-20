@@ -1,0 +1,30 @@
+<style>
+    /* LAB.JS */
+    /* note positioning for any container around your HTML may need tweaking too */
+    :root{
+        --line-height: 1 !important; /* gives canvas normal proportions */
+    }
+
+    #fullpage { /* this div will take up the entire page */
+        position: absolute;
+        background-color: white;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .unhook{ /* attach this class in js to stop fullpage and show sumbit button underneath */
+        height: auto !important;
+    }
+
+    button[type="submit"][form="page-form"]{ /* can be used to show/hide page sumbit button */
+        display: none;
+    }
+
+</style>
+<main id="fullpage">
+    <!-- EVERYTHING INSIDE BODY TAGS HERE -->
+</main>

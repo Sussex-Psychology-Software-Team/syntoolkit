@@ -1,0 +1,214 @@
+{
+  "components": {
+    "1": {
+      "id": "1",
+      "type": "lab.html.Page",
+      "items": [
+        {
+          "required": true,
+          "type": "html",
+          "content": "<style>\n    /* LAB.JS */\n    :root{\n        --line-height: 1 !important;\n    }\n    \n    button[type=\"submit\"][form=\"page-form\"]{\n        display: none;\n    }\n    \n    #container{\n        left: 50%;\n        transform: translateX(-50%);\n    }\n    /* --------------- */\n\n    #container{\n        width: 70vmin;\n        position: relative;\n        display: grid;\n        grid-template-columns: auto;\n        row-gap: 5px;\n    }\n\n    #top-text{\n        display: flex;\n        justify-content: space-between;\n        font-size: 2vmin;\n    }\n\n    #picker{\n        display: flex;\n        gap: 10px;\n        width: 70vmin;\n        height: 30vmin;\n    }\n\n    canvas {\n        border-style: solid;\n    }\n\n    #grapheme {\n        margin: auto;\n        font-size: 25vmin;\n    }\n\n    #buttons {\n        display: flex;\n        justify-content: space-around;\n    }\n\n    .button{\n        font-size: 2vmin;\n        width: 15vmin;\n        height: 4vmin;\n    }\n\n</style>\n<main>\n    <div id=\"container\"> <!-- 770 = (360*2) + 30 + 10px gaps-->\n        <div id=\"top-text\">\n            <span>Choose the best colour by clicking on the colour-bar and shade box.</span>\n            <span><span id=\"remaining\"></span> left to do.</span>\n        </div>\n        <div id=\"picker\">\n            <canvas id=\"shade\" height=\"180\" width=\"180\"></canvas>\n            <canvas id=\"hue\" height=\"180\" width=\"30\"></canvas>\n            <span id=\"grapheme\" height=\"180\" width=\"180\">A</span>\n        </div>\n        <canvas id=\"display\" height=\"180\" width=\"410\"></canvas>\n        <div id=\"buttons\">\n            <input type=\"button\" id=\"no_colour\" class=\"button\" value=\"'No Colour\">\n            <input type=\"button\" id=\"select\" class=\"button\"value='Select'>\n        </div>\n    </div>\n</main>\n"
+        }
+      ],
+      "scrollTop": true,
+      "submitButtonText": "Continue →",
+      "submitButtonPosition": "right",
+      "files": [],
+      "responses": [
+        {
+          "label": "",
+          "event": "",
+          "target": "",
+          "filter": ""
+        }
+      ],
+      "parameters": [
+        {
+          "name": "",
+          "value": "",
+          "type": "string"
+        }
+      ],
+      "messageHandlers": [
+        {
+          "title": "grapheme-colour",
+          "message": "run",
+          "code": "// Lab.js ---------------- NOTE: run this whole script on 'run' event\n// create graphemes list based on answers to previous synaesthesia questions\nconst ds = this.options.datastore\n//WAYS TO ACCESS THE FORM RESPONSES: ds.data[ds.data.length-1].letters; ds.get('letters'); ds.extract('letters','grapheme-questionnaire') where 'grapheme-questionnaire' is the name of the lab.js element\nconst letter_syn = ds.get('letters') //name of HTML input element, returns selected value\nconst number_syn = ds.get('numbers')\n\nconst letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'\nconst numbers = '0123456789'\nlet grapheme_set = ''\n\n//note: if using single option (e.g. 1 radio-buttons each for 'letters' and 'numbers) check if selected with e.g.letter_syn[0] !== undefined\nif(letter_syn=='no' && number_syn=='no'){\n    // move foward\n    endTest()\n}\nif(letter_syn=='yes'){ \n    grapheme_set += letters\n}\nif(number_syn=='yes'){\n    grapheme_set += numbers\n}\n\n//store data at end of test\nfunction endTest(end_text){\n    //stuff to do when the exp is ended\n    for(let i=0;i<data.length;i++){\n        ds.commit(data[i])\n    }\n    document.getElementById('container').innerHTML = end_text+'<br>Please press the Continue button below'//JSON.stringify(data)\n    document.querySelector('button[type=\"submit\"][form=\"page-form\"]').style.display = 'block';\n    return\n}\n\n\n// CANVAS ------------------\nconst hue_canvas = document.getElementById(\"hue\");\nconst hue_ctx = hue_canvas.getContext('2d');\nconst shade_canvas = document.getElementById(\"shade\",{ willReadFrequently: true });\nconst shade_ctx = shade_canvas.getContext('2d');\nconst display_canvas = document.getElementById(\"display\");\nconst display_ctx = display_canvas.getContext('2d');\n\n\n\n// GRAPHEMES ------------------\nfunction shuffle(array) {\n    let currentIndex = array.length,  randomIndex;\n    while (currentIndex > 0) { // While there remain elements to shuffle.\n        // Pick a remaining element.\n        randomIndex = Math.floor(Math.random() * currentIndex);\n        currentIndex--;\n        // And swap it with the current element.\n        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];\n    }\n    return array;\n}\n\nfunction getGraphemes(raw_graphemes, repeats){\n    //note we are going to check scores after the first pass of all grpahemes so need to be shuffled in sets\n    let graphemes_array = raw_graphemes.split('') //make array\n    let rep_graphemes = '';\n    for(let i=0;i<repeats;i++){\n        shuffle(graphemes_array) //shuffle array of graphemes\n        rep_graphemes += graphemes_array.join('') //append as string\n    }\n    const graphemes = rep_graphemes.split('')\n    return graphemes\n}\n\n\n// HUE -----------------\nfunction drawHues(){\n    const width = hue_canvas.width\n    const height = hue_canvas.height\n    hue_ctx.clearRect(0, 0, width, height)\n    for(let h=0; h<361; h++){\n        hue_ctx.fillStyle = `hsl(${h+offset}, 100%, 50%)`;\n        hue_ctx.fillRect(0, h*(height/360), width, 2)\n        //hue_ctx.strokeStyle = `hsl(${h+offset}, 100%, 50%)`\n        //hue_ctx.beginPath()\n        //hue_ctx.moveTo(0, h*(height/360))\n        //hue_ctx.lineTo(width, h*(height/360))\n        //hue_ctx.stroke()\n    }\n}\n\nhue_canvas.addEventListener('mousedown',hueSelect);\nhue_canvas.addEventListener('mouseup', ()=>{ hue_canvas.onmousemove = null });\nhue_canvas.addEventListener('mouseout', ()=>{ hue_canvas.onmousemove = null });\n\nfunction hueSelect(e){\n    drawHues() //clear canvas\n    //draw black line at location\n    hue_ctx.strokeStyle = 'black';\n    hue_ctx.beginPath();\n    hue_ctx.moveTo(0, e.offsetY);\n    hue_ctx.lineTo(hue_canvas.width, e.offsetY);\n    hue_ctx.stroke();\n    // replace canvas colour\n    hue_loc = e.offsetY //laziness for handling resize events\n    h = ((e.offsetY*(360/hue_canvas.height))+offset) % 360\n    shadeSelect(shade_loc) // keep selected shade consistent\n    shade_canvas.onmousemove = null //remove mousemove event added in shadeSelect()\n    hue_canvas.onmousemove = hueSelect //add handler on click to move as well\n}\n\n\n// SHADE -----------------\nfunction drawShades(h){\n    shade_ctx.clearRect(0,0,shade_canvas.width,shade_canvas.height);\n    const w = shade_canvas.width/100 //canvas width is 360, with 100 s and l values\n    for(let s=0;s<101;s++){\n        for(let l=0;l<101;l++){\n            shade_ctx.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;\n            shade_ctx.fillRect(Math.ceil(s*w),Math.ceil(l*w),Math.ceil(w),Math.ceil(w)); //w+1 on last two also deals with aliasing well enough?\n        }\n    }\n}\n\n//selection on shade canvas\nshade_canvas.addEventListener('mousedown',shadeSelect);\nshade_canvas.addEventListener('mouseup', ()=>{ shade_canvas.onmousemove = null });\nshade_canvas.addEventListener('mouseout', ()=>{ shade_canvas.onmousemove = null });\n\nfunction shadeSelect(e){\n    //hue must be selected first, and stop mousemove out of bounds\n    if(h===undefined || e.offsetX>shade_canvas.width || e.offsetX<0 || e.offsetY>shade_canvas.height || e.offsetY<0){ return }\n    //store data\n    const w = shade_canvas.width/100\n    data[trial_num].hsl = [h, Math.round(e.offsetX/w), Math.round(e.offsetY/w)] //store current hsl\n    shade_loc = {'offsetX':e.offsetX, 'offsetY':e.offsetY} //store selected shade. stays the same on event of hue change.\n    //draw on canvases\n    drawShades(h) //redraw\n    selectedColour(shade_loc)  //get colour on fresh draw\n    //draw select circle\n    shade_ctx.strokeStyle = 'black'\n    shade_ctx.beginPath();\n    shade_ctx.arc(e.offsetX, e.offsetY, w*1, 0, 2 * Math.PI);\n    shade_ctx.stroke();\n    shade_canvas.onmousemove = shadeSelect\n}\n\n\n// DSIPLAY -------------------\nfunction selectedColour(e){\n    select.disabled = false\n    //get colour and put on other canvas, e.target.getContext('2d').getImageData()\n    const p = shade_ctx.getImageData(e.offsetX, e.offsetY, 1, 1).data; //rgb - can optionally use a input event?\n    display_ctx.fillStyle = `rgb(${p})`;\n    display_ctx.fillRect(0, 0, display_canvas.width, display_canvas.height)\n    grapheme.style.color = `rgb(${p})`; //comment this out to remove chaning the font colour\n    data[trial_num].rgb = Object.values(p).slice(0,-1) //store data\n}\n\n\n// BUTTONS ---------------------\nconst select = document.getElementById(\"select\")\nconst no_colour = document.getElementById(\"no_colour\")\n\nselect.addEventListener('click', buttonClick)\nno_colour.addEventListener('click', buttonClick)\n\nfunction buttonClick(e){\n    if(e.target.id == 'no_colour'){ //wipe data if no colour selected\n        data[trial_num].rgb = []\n        data[trial_num].hsl = []\n    }\n    data[trial_num].no_colour = e.target.id==='no_colour'\n    data[trial_num].reaction_time = e.timeStamp-start_time\n    console.log(data)\n    newTrial()\n}\n\n\n// RUN ----------------\n//text displays\nconst grapheme = document.getElementById(\"grapheme\")\nconst remaining = document.getElementById(\"remaining\")\n\n//globals\nconst graphemes = getGraphemes(grapheme_set,3) //repeats=2 returns 2 copies of array\nlet h, offset, shade_loc, data=[], trial_num = -1, hue_loc, start_time  //being lazy with the y\n\nfunction newTrial(){\n    trial_num++\n    if(trial_num === grapheme_set.length){ //STOPPING RULE\n        const no_colour_count = data.filter(function (e) { return e.no_colour === true; });\n        if(no_colour_count.length/grapheme_set.length > .9){ //end if >90% of trials were 'no colour'\n            endTest(\"Sorry, you pressed the 'No Colour' button too many times to continue this test.\")\n            return\n        }\n    } else if(trial_num==graphemes.length){ //END OF EXP\n        endTest('')\n        return\n    }\n\n    //hues at random location\n    offset = Math.floor(Math.random() * 361);\n    drawHues()\n\n    //clear display\n    shade_ctx.clearRect(0, 0, shade_canvas.width, shade_canvas.height)\n    display_ctx.clearRect(0, 0, display_canvas.width, display_canvas.height)\n    select.disabled = true\n\n    //clear globals\n    h = undefined\n    shade_loc = {'offsetX':shade_canvas.width-1, 'offsetY':shade_canvas.height/2} //init hue to max sat\n\n    //setup data\n    const g = graphemes[trial_num]\n    data.push({\n        'trial_number': trial_num,\n        'grapheme':g,\n        'rgb':[],\n        'hsl':[],\n        'no_colour': false,\n        'reaction_time':0,\n    })\n    \n    //update html\n    grapheme.style.color = 'black';\n    grapheme.innerHTML = g;\n    remaining.innerHTML = graphemes.length-trial_num\n    start_time = performance.now()\n}\n\nnewTrial()\n\n\n// WINDOW RESIZE ------------\nwindow.onresize = windowResize\nlet min = Math.min(window.innerWidth, window.innerHeight)\n\nfunction windowResize(){ // set canvas size in HTML\n    const change = min/Math.min(window.innerWidth, window.innerHeight)\n    min = Math.min(window.innerWidth, window.innerHeight)\n    const thirty = Math.round(.3*min)\n    //document.getElementById(\"container\").style.width = .7*min+'px'\n    //document.getElementById(\"picker\").style.width = .7*min+'px'\n    //document.getElementById(\"picker\").style.height = .3*min+'px'\n    hue_canvas.height = thirty\n    hue_canvas.width = thirty/10\n    shade_canvas.width = thirty\n    shade_canvas.height = thirty\n    display_canvas.height = thirty\n    display_canvas.width = .7*min\n    drawHues() //redraw\n    if(h!==undefined){ // redraw selected values\n        let e = {'offsetY': hue_loc /= change } // too difficult to extract hue_loc from h otherwise..\n        hueSelect(e)\n        drawShades(h)\n        if(change!=1){\n            shade_loc.offsetX /= change\n            shade_loc.offsetY /= change\n        }\n        shadeSelect(shade_loc)\n        hue_canvas.onmousemove = null\n        shade_canvas.onmousemove = null\n    }\n}\n\nwindowResize()"
+        }
+      ],
+      "title": "grapheme-colour-synesthesia",
+      "_tab": "Content"
+    },
+    "2": {
+      "id": "2",
+      "type": "lab.html.Form",
+      "content": "<main>\n<form>\n      <label for=\"letters\">Do you have letter-grapheme synaesthesia?</label><br>\n      <input type=\"radio\" id=\"letters_yes\" name=\"letters\" value=\"yes\">\n      <label for=\"letters_yes\">Yes</label><br>\n      <input type=\"radio\" id=\"letters_no\" name=\"letters\" value=\"no\">\n      <label for=\"letters_no\">No</label><br>\n      <br>\n      <label for=\"numbers\">Do you have number-grapheme synaesthesia?</label><br>\n      <input type=\"radio\" id=\"numbers_yes\" name=\"numbers\" value=\"yes\">\n      <label for=\"numbers_yes\">Yes</label><br>\n      <input type=\"radio\" id=\"numbers_no\" name=\"numbers\" value=\"no\">\n      <label for=\"numbers_no\">No</label><br>\n  <button type=\"submit\">Submit</button>\n</form>\n</main>",
+      "scrollTop": true,
+      "files": [],
+      "responses": [
+        {
+          "label": "",
+          "event": "",
+          "target": "",
+          "filter": ""
+        }
+      ],
+      "parameters": [
+        {
+          "name": "",
+          "value": "",
+          "type": "string"
+        }
+      ],
+      "messageHandlers": [
+        {
+          "title": "",
+          "message": "run",
+          "code": ""
+        }
+      ],
+      "title": "grapheme-colour-questionnaire",
+      "_tab": "Content"
+    },
+    "3": {
+      "id": "3",
+      "type": "lab.html.Page",
+      "items": [
+        {
+          "required": true,
+          "type": "html",
+          "content": "<style>\n    /* LAB.JS */\n    :root{\n        --line-height: 1 !important;\n    }\n\n    #main{\n        position: absolute;\n        background-color: white;\n        overflow: hidden;\n        height: 100vh;\n        width: 100vw;\n        top: 50%;\n        left: 50%;\n        transform: translate(-50%, -50%);\n    }\n\n    .unhook{\n        height: auto !important;\n    }\n    \n    /* -------------------- */\n    p {\n    /* Stop text highlighting */\n    -webkit-touch-callout: none; /* iOS Safari */\n      -webkit-user-select: none; /* Safari */\n       -khtml-user-select: none; /* Konqueror HTML */\n         -moz-user-select: none; /* Old versions of Firefox */\n          -ms-user-select: none; /* Internet Explorer/Edge */\n              user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */\n    }\n\n    #counter{\n        float: right;\n    }\n\n    #sequence{\n        position: absolute;\n        top: 50%;\n        left: 50%;\n        transform: translate(-50%, -50%);\n        font-size: 20px;\n    }\n\n</style>\n<main id=\"main\">\n    <p id=\"counter\" hidden><span id=\"count\"></span> trials remaining<br>Press Spacebar or 'n' if no association.</p>\n    <p id=\"sequence\">\n        In this test you'll see numbers (0-9), days of the week (e.g., Tuesday), and months of the year (e.g., July) displayed in the centre of the screen.<br><br>\n        Your task is to think about how these concepts might be arranged spatially on a two-dimensional (ie., flat) screen. Some people may automatically think about these concepts spatially in their everyday life, and if this is something you do, then you should use this.<br><br>\n        For other people this may seem like a strange task, but just go with your intuitions. There aren’t any right or wrong answers.<br><br>\n        <strong>When you see each item on the computer screen, visualise where it fits spatially and click the mouse in the corresponding location on the screen.</strong><br><br>\n        Each item (number or day or month) is repeated three times.<br><br>\n        In order to accurately measure this type of synaesthesia this task will be longer than others in The Perception Census. We appreciate you sticking with it! You will be able to see your progress as you go through the test.<br><br>\n        If you do not have any spatial association with the sequence displayed press the 'Spacebar' or 'n' key to skip.<br><br>\n        <i>Please press Spacebar to continue.</i>\n    </p>\n</main>\n"
+        }
+      ],
+      "scrollTop": true,
+      "submitButtonText": "Continue →",
+      "submitButtonPosition": "right",
+      "files": [],
+      "responses": [
+        {
+          "label": "",
+          "event": "",
+          "target": "",
+          "filter": ""
+        }
+      ],
+      "parameters": [
+        {
+          "name": "",
+          "value": "",
+          "type": "string"
+        }
+      ],
+      "messageHandlers": [
+        {
+          "title": "sequence-space",
+          "message": "run",
+          "code": "// Lab.js ----------------\nconst ds = this.options.datastore\n\nfunction endTest(end_text=JSON.stringify(data)){\n    document.removeEventListener('click',changeText)\n    document.removeEventListener('keydown',changeText)\n    document.getElementById('counter').hidden = true\n\n    for(let i=0;i<data.length;i++){\n        ds.commit(data[i])\n    }\n    document.getElementById(\"main\").className = \"unhook\"; //stops our main div taking up the whole screen\n    text.innerHTML = end_text+'<br>Please press the continue button below.'//JSON.stringify(data)\n}\n// Browser specific ----------------\nfunction endTest(end_text=JSON.stringify(data)){\n    document.removeEventListener('click',changeText)\n    document.removeEventListener('keydown',changeText)\n    document.getElementById('counter').hidden = true\n\n    text.innerHTML = end_text\n}\n\n\n\n// Stimuli ----------------\nconst sequences_set = [0,1,2,3,4,5,6,7,8,9,\n            'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday',\n            'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', \n            'September', 'October', 'November', 'December']\n\nfunction shuffle(array) {\n    let currentIndex = array.length,  randomIndex;\n    while (currentIndex > 0) { // While there remain elements to shuffle.\n        // Pick a remaining element.\n        randomIndex = Math.floor(Math.random() * currentIndex);\n        currentIndex--;\n        // And swap it with the current element.\n        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];\n    }\n    return array;\n}\n\nfunction duplicateArray(array, repeats){\n    const duplicated = []\n    for(let i=0;i<repeats;i++){\n        shuffle(array)\n        duplicated.push(... array) //nested for loop as polyfill?\n    }\n    return duplicated\n}\n\nconst seqs = duplicateArray(sequences_set,3) //e.g. dups=2 doubles array\n\n\n// Run ----------------\nlet trial_number = -1, start_time //trial -1 is the instruction screen\nconst data = [];\nconst text = document.getElementById('sequence')\nconst count = document.getElementById('count')\n\ndocument.addEventListener('click',changeText)\ndocument.addEventListener('keydown',changeText)\n\nfunction changeText(e){\n    const keydown = e.type === 'keydown'\n    if(keydown && e.key!=' ' && e.key!='n'){ return }  //check for 'no spatial association' keys\n\n    if(trial_number>-1){ // save data after first trial\n        data.push({ //save\n            'sequence': seqs[trial_number],\n            'x': keydown ? -1 : e.clientX, //consider screen, client, page, offset coordinates\n            'y': keydown ? -1 : e.clientY,\n            'window_width': window.innerWidth,\n            'window_height': window.innerHeight,\n            'no_association': keydown,\n            'reaction_time': e.timeStamp-start_time\n        })\n        console.log(data)\n    } else { //on first click\n        if(!keydown){return} // first click may be a little hasty...\n        document.getElementById('counter').hidden = false\n    }\n\n    //last click end exp\n    if(trial_number === seqs.length-1){ \n        endTest()\n        return\n    } else if(trial_number === sequences_set.length){ //STOPPING RULE\n        const no_association_count = data.filter(function(e){return e.no_association === true})\n        if(no_association_count.length/sequences_set.length > .9){\n            endTest(\"Sorry, you pressed the 'No Association' key too many times to continue this test\")\n            return\n        }\n    }\n\n    trial_number++ //increase trial number\n    text.innerHTML = seqs[trial_number]\n    count.innerHTML = seqs.length-trial_number\n    start_time = performance.now()\n}\n\n\n"
+        }
+      ],
+      "title": "sequence-space-synesthesia",
+      "_tab": "Content"
+    },
+    "4": {
+      "id": "4",
+      "type": "lab.html.Page",
+      "items": [
+        {
+          "type": "text",
+          "title": "END",
+          "content": "Thank you for taking part in this experiment!\nPress 'Continue' to download your data."
+        }
+      ],
+      "scrollTop": true,
+      "submitButtonText": "Continue →",
+      "submitButtonPosition": "right",
+      "files": [],
+      "responses": [
+        {
+          "label": "",
+          "event": "",
+          "target": "",
+          "filter": ""
+        }
+      ],
+      "parameters": [
+        {
+          "name": "",
+          "value": "",
+          "type": "string"
+        }
+      ],
+      "messageHandlers": [
+        {
+          "title": "",
+          "message": "",
+          "code": ""
+        }
+      ],
+      "title": "end-page"
+    },
+    "root": {
+      "id": "root",
+      "title": "root",
+      "type": "lab.flow.Sequence",
+      "children": [
+        "2",
+        "1",
+        "3",
+        "4"
+      ],
+      "parameters": [],
+      "plugins": [
+        {
+          "type": "lab.plugins.Metadata"
+        }
+      ],
+      "metadata": {
+        "title": "",
+        "description": "",
+        "repository": "",
+        "contributors": ""
+      }
+    }
+  },
+  "version": [
+    20,
+    2,
+    4
+  ],
+  "files": {
+    "files": {
+      "index.html": {
+        "content": "data:text/html,%3C!doctype%20html%3E%0A%3Chtml%3E%0A%3Chead%3E%0A%20%20%3Cmeta%20charset%3D%22utf-8%22%3E%0A%20%20%3Ctitle%3EExperiment%3C%2Ftitle%3E%0A%20%20%3C!--%20viewport%20setup%20--%3E%0A%20%20%3Cmeta%20name%3D%22viewport%22%20content%3D%22width%3Ddevice-width%2C%20initial-scale%3D1%22%3E%0A%20%20%3C!--%20lab.js%20library%20and%20experiment%20code%20--%3E%0A%20%20%24%7B%20header%20%7D%0A%3C%2Fhead%3E%0A%3Cbody%3E%0A%20%20%3C!--%20If%20you'd%20rather%20have%20a%20container%20with%20a%20fixed%20width%0A%20%20%20%20%20%20%20and%20variable%20height%2C%20try%20removing%20the%20fullscreen%20class%20below%20--%3E%0A%20%20%3Cdiv%20class%3D%22container%20fullscreen%22%20data-labjs-section%3D%22main%22%3E%0A%20%20%20%20%3Cmain%20class%3D%22content-vertical-center%20content-horizontal-center%22%3E%0A%20%20%20%20%20%20%3Cdiv%3E%0A%20%20%20%20%20%20%20%20%3Ch2%3ELoading%20Experiment%3C%2Fh2%3E%0A%20%20%20%20%20%20%20%20%3Cp%3EThe%20experiment%20is%20loading%20and%20should%20start%20in%20a%20few%20seconds%3C%2Fp%3E%0A%20%20%20%20%20%20%3C%2Fdiv%3E%0A%20%20%20%20%3C%2Fmain%3E%0A%20%20%3C%2Fdiv%3E%0A%3C%2Fbody%3E%0A%3C%2Fhtml%3E%0A",
+        "source": "library"
+      },
+      "style.css": {
+        "content": "data:text/css,%2F*%20Please%20define%20your%20custom%20styles%20here%20*%2F",
+        "source": "library"
+      }
+    },
+    "bundledFiles": {
+      "lib/lab.js": {
+        "type": "application/javascript"
+      },
+      "lib/lab.js.map": {
+        "type": "text/plain"
+      },
+      "lib/lab.fallback.js": {
+        "type": "application/javascript"
+      },
+      "lib/lab.legacy.js": {
+        "type": "application/javascript"
+      },
+      "lib/lab.legacy.js.map": {
+        "type": "text/plain"
+      },
+      "lib/lab.css": {
+        "type": "text/css"
+      },
+      "lib/loading.svg": {
+        "type": "image/svg+xml"
+      }
+    }
+  }
+}

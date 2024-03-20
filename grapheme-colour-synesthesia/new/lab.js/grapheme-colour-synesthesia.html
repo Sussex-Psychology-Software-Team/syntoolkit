@@ -1,48 +1,66 @@
 <style>
+    /* LAB.JS */
     :root{
         --line-height: 1 !important;
     }
+    
+    button[type="submit"][form="page-form"]{
+        display: none;
+    }
+    
+    #container{
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    /* --------------- */
 
     #container{
+        width: 70vmin;
         position: relative;
-        width: 410px;
         display: grid;
         grid-template-columns: auto;
         row-gap: 5px;
-        font-size: 12px;
     }
-    
+
     #top-text{
         display: flex;
         justify-content: space-between;
+        font-size: 2vmin;
     }
-    
+
     #picker{
         display: flex;
         gap: 10px;
+        width: 70vmin;
+        height: 30vmin;
     }
-    
+
     canvas {
         border-style: solid;
+    }
 
-    }
-    
-    #grapheme{
+    #grapheme {
         margin: auto;
-        font-size: 150px;
+        font-size: 25vmin;
     }
-    
+
     #buttons {
         display: flex;
         justify-content: space-around;
     }
-    
+
+    .button{
+        font-size: 2vmin;
+        width: 15vmin;
+        height: 4vmin;
+    }
+
 </style>
 <main>
     <div id="container"> <!-- 770 = (360*2) + 30 + 10px gaps-->
         <div id="top-text">
             <span>Choose the best colour by clicking on the colour-bar and shade box.</span>
-            <span><span id="remaining">48</span> left to do.</span>
+            <span><span id="remaining"></span> left to do.</span>
         </div>
         <div id="picker">
             <canvas id="shade" height="180" width="180"></canvas>

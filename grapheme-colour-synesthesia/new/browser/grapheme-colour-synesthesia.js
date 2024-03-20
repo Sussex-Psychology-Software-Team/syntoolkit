@@ -2,10 +2,21 @@
 // Browser-specific code
 let grapheme_set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 
-function endTest(){
+function endTest(end_text= JSON.stringify(data)){
     //stuff to do when the exp is ended
-    document.getElementById('container').innerHTML = JSON.stringify(data)
+    document.getElementById('container').innerHTML = end_text
 }
+
+
+
+// CANVAS ------------------
+const hue_canvas = document.getElementById("hue");
+const hue_ctx = hue_canvas.getContext('2d');
+const shade_canvas = document.getElementById("shade",{ willReadFrequently: true });
+const shade_ctx = shade_canvas.getContext('2d');
+const display_canvas = document.getElementById("display");
+const display_ctx = display_canvas.getContext('2d');
+
 
 
 // GRAPHEMES ------------------
@@ -34,24 +45,19 @@ function getGraphemes(raw_graphemes, repeats){
 }
 
 
-// CANVAS ------------------
-const hue_canvas = document.getElementById("hue");
-const hue_ctx = hue_canvas.getContext('2d');
-const shade_canvas = document.getElementById("shade",{ willReadFrequently: true });
-const shade_ctx = shade_canvas.getContext('2d');
-const display_canvas = document.getElementById("display");
-const display_ctx = display_canvas.getContext('2d');
-
-
 // HUE -----------------
 function drawHues(){
-    hue_ctx.clearRect(0, 0, hue_canvas.width, hue_canvas.height)
+    const width = hue_canvas.width
+    const height = hue_canvas.height
+    hue_ctx.clearRect(0, 0, width, height)
     for(let h=0; h<361; h++){
-        hue_ctx.strokeStyle = `hsl(${h+offset}, 100%, 50%)`;
-        hue_ctx.beginPath();
-        hue_ctx.moveTo(0, h*(hue_canvas.height/360));
-        hue_ctx.lineTo(hue_canvas.width, h*(hue_canvas.height/360));
-        hue_ctx.stroke();
+        hue_ctx.fillStyle = `hsl(${h+offset}, 100%, 50%)`;
+        hue_ctx.fillRect(0, h*(height/360), width, 2)
+        //hue_ctx.strokeStyle = `hsl(${h+offset}, 100%, 50%)`
+        //hue_ctx.beginPath()
+        //hue_ctx.moveTo(0, h*(height/360))
+        //hue_ctx.lineTo(width, h*(height/360))
+        //hue_ctx.stroke()
     }
 }
 
@@ -68,6 +74,7 @@ function hueSelect(e){
     hue_ctx.lineTo(hue_canvas.width, e.offsetY);
     hue_ctx.stroke();
     // replace canvas colour
+    hue_loc = e.offsetY //laziness for handling resize events
     h = ((e.offsetY*(360/hue_canvas.height))+offset) % 360
     shadeSelect(shade_loc) // keep selected shade consistent
     shade_canvas.onmousemove = null //remove mousemove event added in shadeSelect()
@@ -94,7 +101,7 @@ shade_canvas.addEventListener('mouseout', ()=>{ shade_canvas.onmousemove = null 
 
 function shadeSelect(e){
     //hue must be selected first, and stop mousemove out of bounds
-    if(h===undefined || e.offsetX>=shade_canvas.width || e.offsetX<0 || e.offsetY>shade_canvas.height || e.offsetY<0){ return }
+    if(h===undefined || e.offsetX>shade_canvas.width || e.offsetX<0 || e.offsetY>shade_canvas.height || e.offsetY<0){ return }
     //store data
     const w = shade_canvas.width/100
     data[trial_num].hsl = [h, Math.round(e.offsetX/w), Math.round(e.offsetY/w)] //store current hsl
@@ -105,7 +112,7 @@ function shadeSelect(e){
     //draw select circle
     shade_ctx.strokeStyle = 'black'
     shade_ctx.beginPath();
-    shade_ctx.arc(e.offsetX, e.offsetY, 5, 0, 2 * Math.PI);
+    shade_ctx.arc(e.offsetX, e.offsetY, w*1, 0, 2 * Math.PI);
     shade_ctx.stroke();
     shade_canvas.onmousemove = shadeSelect
 }
@@ -136,8 +143,11 @@ function buttonClick(e){
         data[trial_num].hsl = []
     }
     data[trial_num].no_colour = e.target.id==='no_colour'
+    data[trial_num].reaction_time = e.timeStamp-start_time
+    console.log(data)
     newTrial()
 }
+
 
 // RUN ----------------
 //text displays
@@ -146,18 +156,18 @@ const remaining = document.getElementById("remaining")
 
 //globals
 const graphemes = getGraphemes(grapheme_set,3) //repeats=2 returns 2 copies of array
-let h, offset, shade_loc, data=[], trial_num = -1;
+let h, offset, shade_loc, data=[], trial_num = -1, hue_loc, start_time  //being lazy with the y
 
 function newTrial(){
     trial_num++
     if(trial_num === grapheme_set.length){ //STOPPING RULE
         const no_colour_count = data.filter(function (e) { return e.no_colour === true; });
         if(no_colour_count.length/grapheme_set.length > .9){ //end if >90% of trials were 'no colour'
-            document.getElementById('container').innerHTML = "Sorry, you pressed the 'No Colour' button too many times to continue this test."
+            endTest("Sorry, you pressed the 'No Colour' button too many times to continue this test.")
             return
         }
     } else if(trial_num==graphemes.length){ //END OF EXP
-        endTest()
+        endTest('')
         return
     }
 
@@ -166,7 +176,7 @@ function newTrial(){
     drawHues()
 
     //clear display
-    shade_ctx.clearRect(0,0,shade_canvas.width,shade_canvas.height);
+    shade_ctx.clearRect(0, 0, shade_canvas.width, shade_canvas.height)
     display_ctx.clearRect(0, 0, display_canvas.width, display_canvas.height)
     select.disabled = true
 
@@ -181,13 +191,50 @@ function newTrial(){
         'grapheme':g,
         'rgb':[],
         'hsl':[],
-        'no_colour': false
+        'no_colour': false,
+        'reaction_time':0,
     })
     
     //update html
     grapheme.style.color = 'black';
     grapheme.innerHTML = g;
     remaining.innerHTML = graphemes.length-trial_num
+    start_time = performance.now()
 }
 
 newTrial()
+
+
+// WINDOW RESIZE ------------
+window.onresize = windowResize
+let min = Math.min(window.innerWidth, window.innerHeight)
+
+function windowResize(){ // set canvas size in HTML
+    const change = min/Math.min(window.innerWidth, window.innerHeight)
+    min = Math.min(window.innerWidth, window.innerHeight)
+    const thirty = Math.round(.3*min)
+    //document.getElementById("container").style.width = .7*min+'px'
+    //document.getElementById("picker").style.width = .7*min+'px'
+    //document.getElementById("picker").style.height = .3*min+'px'
+    hue_canvas.height = thirty
+    hue_canvas.width = thirty/10
+    shade_canvas.width = thirty
+    shade_canvas.height = thirty
+    display_canvas.height = thirty
+    display_canvas.width = .7*min
+    drawHues() //redraw
+    if(h!==undefined){ // redraw selected values
+        let e = {'offsetY': hue_loc /= change } // too difficult to extract hue_loc from h otherwise..
+        hueSelect(e)
+        drawShades(h)
+        if(change!=1){
+            shade_loc.offsetX /= change
+            shade_loc.offsetY /= change
+        }
+        shadeSelect(shade_loc)
+        hue_canvas.onmousemove = null
+        shade_canvas.onmousemove = null
+    }
+}
+
+windowResize()
