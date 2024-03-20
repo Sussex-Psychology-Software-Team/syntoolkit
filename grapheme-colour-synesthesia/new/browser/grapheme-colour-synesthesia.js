@@ -1,7 +1,8 @@
 // BROWSER ------------------
 // Browser-specific code
 let grapheme_set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-
+let data=[] //decalre here incase we end study before collecting data
+let runTest = true //to stop trial execution early if needed
 function endTest(end_text= JSON.stringify(data)){
     //stuff to do when the exp is ended
     document.getElementById('container').innerHTML = end_text
@@ -156,7 +157,7 @@ const remaining = document.getElementById("remaining")
 
 //globals
 const graphemes = getGraphemes(grapheme_set,3) //repeats=2 returns 2 copies of array
-let h, offset, shade_loc, data=[], trial_num = -1, hue_loc, start_time  //being lazy with the y
+let h, offset, shade_loc, trial_num = -1, hue_loc, start_time  //being lazy with the y
 
 function newTrial(){
     trial_num++
@@ -202,8 +203,9 @@ function newTrial(){
     start_time = performance.now()
 }
 
-newTrial()
-
+if(runTest){
+    newTrial()
+}
 
 // WINDOW RESIZE ------------
 window.onresize = windowResize

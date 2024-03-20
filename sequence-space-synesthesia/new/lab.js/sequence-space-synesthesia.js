@@ -84,7 +84,7 @@ function changeText(e){
 
     //last click end exp
     if(trial_number === seqs.length-1){ 
-        endTest()
+        endTest('You have reached the end of this test.')
         return
     } else if(trial_number === sequences_set.length){ //STOPPING RULE
         const no_association_count = data.filter(function(e){return e.no_association === true})

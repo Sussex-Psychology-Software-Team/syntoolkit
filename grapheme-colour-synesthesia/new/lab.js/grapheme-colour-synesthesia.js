@@ -8,12 +8,16 @@ const number_syn = ds.get('numbers')
 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const numbers = '0123456789'
 let grapheme_set = ''
-
+let data=[] //decalre here incase we end study before collecting data
+let runTest = true;
 //note: if using single option (e.g. 1 radio-buttons each for 'letters' and 'numbers) check if selected with e.g.letter_syn[0] !== undefined
 if(letter_syn=='no' && number_syn=='no'){
     // move foward
+    runTest = false
     endTest('You have indicated that you do not have Grapheme-colour synaesthesia.')
+    return
 }
+
 if(letter_syn=='yes'){ 
     grapheme_set += letters
 }
@@ -27,6 +31,7 @@ function endTest(end_text){
     for(let i=0;i<data.length;i++){
         ds.commit(data[i])
     }
+
     document.getElementById('container').innerHTML = end_text+'<br>Please press the Continue button below'//JSON.stringify(data)
     document.querySelector('button[type="submit"][form="page-form"]').style.display = 'block';
     return
@@ -180,7 +185,7 @@ const remaining = document.getElementById("remaining")
 
 //globals
 const graphemes = getGraphemes(grapheme_set,3) //repeats=2 returns 2 copies of array
-let h, offset, shade_loc, data=[], trial_num = -1, hue_loc, start_time  //being lazy with the y
+let h, offset, shade_loc, trial_num = -1, hue_loc, start_time  //being lazy with the y
 
 function newTrial(){
     trial_num++
@@ -226,8 +231,9 @@ function newTrial(){
     start_time = performance.now()
 }
 
-newTrial()
-
+if(runTest){
+    newTrial()
+}
 
 // WINDOW RESIZE ------------
 window.onresize = windowResize
